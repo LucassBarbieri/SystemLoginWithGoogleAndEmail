@@ -1,13 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react'
-import { Navigate } from 'react-router-dom';
 import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from '../../firebase';
 import { app } from "../../firebase/index";
-// import DashAdmin from '../DashAdmin/DashAdmin';
-// import DashClient from '../DashClient/DashClient';
-// import Landing from '../Landing/Landing';
 
 export const GlobalContext = createContext()                            // Crea context GLOBAL
 export const CartContext = createContext()                              // Crea context CART (Carrito) 
@@ -160,11 +156,11 @@ export const GoogleProvider = ({ children }) => {
         signInWithPopup(auth, provider)
             .then((result) => {
 
-                console.log(result) // Para ver en consola mas propiedades a extraer
+                // console.log(result) // Para ver en consola mas propiedades a extraer
 
             })
             .catch((error) => {
-                console.log(error);
+                // console.log(error);
                 alert("Error al logear")
             });
     };
@@ -191,6 +187,7 @@ export const UserFirebaseProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const firestore = getFirestore(app)
     const [isRegister, setIsRegister] = useState(false);
+    const [rol, setRol] = useState(false);
 
     async function registrarUsuario(email, password, rol) {
 
@@ -213,7 +210,13 @@ export const UserFirebaseProvider = ({ children }) => {
         const docuCifrada = await getDoc(docRef);
         const infoFinal = docuCifrada.data().rol;
 
-        console.log(infoFinal) // NOS DA EL RANGO QUE SE LOGEA
+        if (infoFinal === 'admin') {
+            setRol('admin')
+        } else {
+            setRol('cliente')
+        }
+
+        // console.log(infoFinal)
 
         return infoFinal;
 
@@ -266,7 +269,7 @@ export const UserFirebaseProvider = ({ children }) => {
     // RETORNAMOS PROPIEDADES A UTILIZAR EN OTROS COMPONENTES
     return (
         <>
-            <UserFirebaseContext.Provider value={{ isRegister, setIsRegister, submithandler }}>
+            <UserFirebaseContext.Provider value={{ isRegister, setIsRegister, submithandler, rol, setRol }}>
                 {children}
             </UserFirebaseContext.Provider>
         </>

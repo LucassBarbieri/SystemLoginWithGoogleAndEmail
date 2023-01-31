@@ -1,18 +1,19 @@
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { GoogleContext } from '../Context/Context';
 import { UserFirebaseContext } from '../Context/Context';
-import './Login.css'
 
+import './Login.css';
 
 export const Login = () => {
 
     const { signInWithGoogle, checkuser } = useContext(GoogleContext)
     const { isRegister, setIsRegister, submithandler } = useContext(UserFirebaseContext)
-
+    console.log(isRegister);
     return (
         <>
+            
             {checkuser ? <Navigate to="/home" /> :
 
                 <div className="bg-gradient-primary">
@@ -58,7 +59,6 @@ export const Login = () => {
                                                         <input className="btn btn-primary d-block btn-user w-100" type="submit" value={isRegister ? "Registrar" : "Iniciar session"} />
 
                                                         <hr />
-
                                                         <div onClick={() => setIsRegister(!isRegister)}>{isRegister ? "Ya tengo una cuenta" : "Registrarme"}</div>
 
                                                         <hr />
@@ -69,17 +69,6 @@ export const Login = () => {
                                                         <i className="fab fa-google"></i>
                                                         &nbsp; Google
                                                     </button>
-
-                                                    <hr />
-
-                                                    <div className="text-center">
-                                                        <Link className="small" to={'/'}>¿Olvidaste la contraseña?</Link>
-                                                    </div>
-
-                                                    <div className="text-center">
-                                                        <button className="small">Crear cuenta</button>
-                                                    </div>
-
                                                 </div>
                                             </div>
 

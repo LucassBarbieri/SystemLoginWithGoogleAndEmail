@@ -1,13 +1,15 @@
 import React from 'react'
-
 import { app } from "../../firebase/";
 import { getAuth, signOut } from 'firebase/auth';
+
 
 // import Landing from '../Landing/Landing'
 
 const auth = getAuth(app);
 
 const DashAdmin = (user) => {
+
+  
 
   return (
     <>

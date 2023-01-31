@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { GoogleContext } from '../Context/Context'
+import { GoogleContext, UserFirebaseContext } from '../Context/Context'
 import { app } from "../../firebase/";
 import { getAuth, signOut } from 'firebase/auth';
 import { useEffect } from 'react';
@@ -11,12 +11,14 @@ import Footer from '../Footer/Footer';
 import '../Home/Home.css'
 
 
-export const Home = (user) => {
+export const Home = () => {
 
     const [loading, setLoading] = useState(false);
     const { checkuser } = useContext(GoogleContext)
+    const { rol } = useContext(UserFirebaseContext)
     const auth = getAuth(app);
 
+    console.log('Tu rol: '.rol)
     useEffect(() => {
         setLoading(true);
         setTimeout(() => {
@@ -34,6 +36,10 @@ export const Home = (user) => {
             
                 {/* Si checkuser es NO redirigime a... */}
                 {!checkuser && <Navigate to="/landing" />}
+                {/* {rol ? <Navigate to="/admin" /> : <Navigate to="/cliente" />} */}
+
+                { rol === 'admin' && <Navigate to="/admin" /> }
+                { rol === 'cliente' && <Navigate to="/cliente" /> }
 
                 {/* ------ Navegadores */}
                 <Topnav />
