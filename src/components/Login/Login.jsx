@@ -1,50 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { GoogleContext } from '../Context/Context';
 import { useContext } from 'react';
-import { app } from "../../firebase/index";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { GoogleContext } from '../Context/Context';
+import { UserFirebaseContext } from '../Context/Context';
 import './Login.css'
 
-const auth = getAuth(app)
 
 export const Login = () => {
 
     const { signInWithGoogle, checkuser } = useContext(GoogleContext)
-
-    const firestore = getFirestore(app)
-    const [isRegister, setIsRegister] = useState(false);
-
-    async function registrarUsuario(email, password, rol) {
-
-        const infoUser = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        ).then((usuarioFirebase) => {
-            return usuarioFirebase;
-        });
-
-        const docRef = doc(firestore, `usuarios/${infoUser.user.uid}`);
-        setDoc(docRef, { email: email, rol: rol });
-
-    }
-
-    function submithandler(e) {
-
-        e.preventDefault();
-
-        const email = e.target.elements.email.value;
-        const password = e.target.elements.password.value;
-        const rol = e.target.elements.rol.value;
-
-        if (isRegister) {
-            registrarUsuario(email, password, rol);
-        } else {
-            signInWithEmailAndPassword(auth, email, password, rol);
-        }
-    }
+    const { isRegister, setIsRegister, submithandler } = useContext(UserFirebaseContext)
 
     return (
         <>

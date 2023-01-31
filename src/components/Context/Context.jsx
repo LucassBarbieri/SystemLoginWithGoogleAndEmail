@@ -1,11 +1,18 @@
 import React, { createContext, useState, useEffect } from 'react'
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from 'firebase/auth';
+import { Navigate } from 'react-router-dom';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { initializeApp } from "firebase/app";
 import { firebaseConfig } from '../../firebase';
+import { app } from "../../firebase/index";
+// import DashAdmin from '../DashAdmin/DashAdmin';
+// import DashClient from '../DashClient/DashClient';
+// import Landing from '../Landing/Landing';
 
 export const GlobalContext = createContext()                            // Crea context GLOBAL
 export const CartContext = createContext()                              // Crea context CART (Carrito) 
 export const GoogleContext = createContext()                            // Crea context GOOGLE LOGIN
+export const UserFirebaseContext = createContext()                      // Crea context GOOGLE LOGIN
 
 // CONTEXT GLOBAL
 const GlobalProvider = ({ children }) => {
@@ -177,4 +184,91 @@ export const GoogleProvider = ({ children }) => {
     )
 }
 
-// NUEVO CONTEXT
+// CONTEXT USER FIREBASE
+export const UserFirebaseProvider = ({ children }) => {
+
+    const auth = getAuth(app)
+    const [user, setUser] = useState(null);
+    const firestore = getFirestore(app)
+    const [isRegister, setIsRegister] = useState(false);
+
+    async function registrarUsuario(email, password, rol) {
+
+        const infoUser = await createUserWithEmailAndPassword(
+            auth,
+            email,
+            password
+        ).then((usuarioFirebase) => {
+            return usuarioFirebase;
+        });
+
+        const docRef = doc(firestore, `usuarios/${infoUser.user.uid}`);
+        setDoc(docRef, { email: email, rol: rol });
+
+    }
+
+    async function getRol(uid) {
+
+        const docRef = doc(firestore, `usuarios/${uid}`);
+        const docuCifrada = await getDoc(docRef);
+        const infoFinal = docuCifrada.data().rol;
+
+        console.log(infoFinal) // NOS DA EL RANGO QUE SE LOGEA
+
+        return infoFinal;
+
+    }
+
+    function setUserWhitFirebaseAndRol(usuarioFirebase) {
+
+        getRol(usuarioFirebase.uid).then((rol) => {
+
+            const userData = {
+                uid: usuarioFirebase.uid,
+                email: usuarioFirebase.email,
+                rol: usuarioFirebase.rol,
+            };
+
+            setUser(userData);
+
+        });
+
+    }
+
+
+    onAuthStateChanged(auth, (usuarioFirebase) => {
+
+        if (usuarioFirebase) {
+            if (!user) {
+                setUserWhitFirebaseAndRol(usuarioFirebase);
+            }
+        } else {
+            setUser(null);
+        }
+
+    })
+
+    const submithandler = (e) => {
+
+        e.preventDefault();
+
+        const email = e.target.elements.email.value;
+        const password = e.target.elements.password.value;
+        const rol = e.target.elements.rol.value;
+
+        if (isRegister) {
+            registrarUsuario(email, password, rol);
+        } else {
+            signInWithEmailAndPassword(auth, email, password, rol);
+        }
+    }
+
+    // RETORNAMOS PROPIEDADES A UTILIZAR EN OTROS COMPONENTES
+    return (
+        <>
+            <UserFirebaseContext.Provider value={{ isRegister, setIsRegister, submithandler }}>
+                {children}
+            </UserFirebaseContext.Provider>
+        </>
+    )
+}
